@@ -1,0 +1,80 @@
+// Esquema de Base de Datos OULAD
+
+Table courses {
+  code_module varchar(45) [pk]
+  code_presentation varchar(45) [pk]
+  module_presentation_length int
+}
+
+Table studentInfo {
+  code_module varchar(45) [pk]
+  code_presentation varchar(45) [pk]
+  id_student int [pk]
+  gender varchar(3)
+  region varchar(45)
+  highest_education varchar(45)
+  imd_band varchar(16) [null]
+  age_band varchar(16)
+  num_of_prev_attempts int
+  studied_credits int
+  disability varchar(3)
+  final_result varchar(45)
+}
+
+Table studentRegistration {
+  code_module varchar(45) [pk]
+  code_presentation varchar(45) [pk]
+  id_student int [pk]
+  date_registration int [null]
+  date_unregistration int [null]
+}
+
+Table assessments {
+  id_assessment int [pk]
+  code_module varchar(45) [not null]
+  code_presentation varchar(45) [not null]
+  assessment_type varchar(45)
+  date int [null]
+  weight float
+}
+
+Table vle {
+  id_site int [pk]
+  code_module varchar(45) [not null]
+  code_presentation varchar(45) [not null]
+  activity_type varchar(45)
+  week_from int [null]
+  week_to int [null]
+}
+
+Table studentAssessment {
+  id_assessment int [pk]
+  id_student int [pk]
+  date_submitted int [not null]
+  is_banked tinyint [not null]
+  score float [null]
+  assessment_result varchar(10) [null, note: 'Calculado en ETL: Pass/Fail']
+}
+
+Table studentVle {
+  id_interaction bigint [pk, increment]
+  code_module varchar(45) [not null]
+  code_presentation varchar(45) [not null]
+  id_student int [not null]
+  id_site int [not null]
+  date int [not null]
+  sum_click int [not null]
+}
+
+// --- Definición de Relaciones ---
+
+Ref: studentInfo.(code_module, code_presentation) > courses.(code_module, code_presentation)
+Ref: studentRegistration.(code_module, code_presentation, id_student) > studentInfo.(code_module, code_presentation, id_student) [delete: cascade]
+
+Ref: assessments.(code_module, code_presentation) > courses.(code_module, code_presentation)
+Ref: vle.(code_module, code_presentation) > courses.(code_module, code_presentation)
+
+Ref: studentAssessment.id_assessment > assessments.id_assessment
+
+Ref: studentVle.(code_module, code_presentation, id_student) > studentRegistration.(code_module, code_presentation, id_student)
+Ref: studentVle.id_site > vle.id_site
